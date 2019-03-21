@@ -9,11 +9,13 @@ package frc.robot;
 
 /// Java imports
 import java.lang.reflect.*;
+import java.util.*;
 // WPILib imports
 import edu.wpi.first.wpilibj.*;
 import edu.wpi.first.wpilibj.drive.*;
 // My imports
 import frc.robot.*;
+import sun.tools.asm.CatchData;
 /**
 * Description here.
 *
@@ -35,38 +37,46 @@ public class CustomizableRobotDriveBase {
 	/**
 	* Constructs a CustomizableRobot object.
 	* 
-	* @param drivetrain the drive base of the robot.
-	* @param
+	* @param drivetrainType the type of drivetrain used (supports Differential, Meccanum, and Killough).
+	* @param driveMode the style of driving (e.g. For Differential drivetrains, the drive modes are Tank, Arcade, and Curvature).
+	* @param driveMotors the drive motors used, in the form of a hashmap with keys as string labels and values as speed controllers.
 	**/
 	public CustomizableRobotDriveBase (
 		Class<? extends RobotDriveBase> drivetrainType, 
 		String driveMode, 
-		SpeedControllerGroup[] driveMotors/*A temporary measure*/) 
+		HashMap <String, SpeedController> driveMotors) 
 		throws NoSuchMethodException, 
-		InstantiationException, 
-		IllegalAccessException, 
-		InvocationTargetException{
+		InstantiationException{
         // Determine drivetrain class.
         switch(drivetrainType.toString()) {
         case "class edu.wpi.first.wpilibj.drive.DifferentialDrive":
             // Determine drive method.
 			switch(driveMode.toLowerCase()) {
 				case "arcade":
+					//The drive methods won't change (though they might get deprecated) so we can ignore NoSuchMethodException.
                     driveMethod = drivetrainType.getMethod("arcadeDrive", double.class, double.class, boolean.class);
 					break;
 				case "tank":
+					//The drive methods won't change (though they might get deprecated) so we can ignore NoSuchMethodException.
 					driveMethod = drivetrainType.getMethod("tankDrive", double.class, double.class, boolean.class);
 					break;
 				case "curvature":
+					//The drive methods won't change (though they might get deprecated) so we can ignore NoSuchMethodException.
 					driveMethod = drivetrainType.getMethod("curvatureDrive", double.class, double.class, boolean.class);
 					break;
 				default:
-					System.out.println("Error: Differential drivetrains do not have drive mode \"" + driveMode + "\".");
+					System.out.println("Error: This program does not recognize \"" + driveMode + "\" as a drive mode for a differential drivetrain.");
 					break;
             }
             // Set drivetrain to be a new instance of DifferentialDrive.
-            Constructor<? extends RobotDriveBase> co = drivetrainType.getConstructor(SpeedController.class, SpeedController.class);
-            drivetrain = co.newInstance(driveMotors[0], driveMotors[1]);
+			Constructor<? extends RobotDriveBase> co = drivetrainType.getConstructor(SpeedController.class, SpeedController.class);
+			//Although the RobotDriveBase class is abstract, we are setting drivetrain to a non-abstract subclass, so we can ignore InstantiationException.
+			try{
+				drivetrain = co.newInstance(driveMotors.get("Left Drive Motors"), driveMotors.get("Right Drive Motors"));
+			}catch(IllegalAccessException | InvocationTargetException e){
+				System.out.println(e);
+				System.exit(1);
+			}
 			break;
 		case "class edu.wpi.first.wpilibj.drive.MecanumDrive":
 			// Implement later
