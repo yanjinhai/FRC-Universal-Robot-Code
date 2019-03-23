@@ -6,38 +6,39 @@
 /*----------------------------------------------------------------------------*/
 
 package frc.robot;
-
-import edu.wpi.first.wpilibj.Joystick;
-import edu.wpi.first.wpilibj.XboxController;
+// Java imports
+import java.util.*;
+// WPILib imports
+import edu.wpi.first.wpilibj.*;
 
 /**
  * Add your docs here.
  */
 public class CustomizableOI {
 
-    private Joystick[] joysticks;
-    private XboxController[] xboxControllers;
+    // private Joystick[] joysticks;
+    // private XboxController[] xboxControllers;
 
-    public CustomizableOI(Joystick[] joysticks, XboxController[] xboxControllers){
-        this.joysticks = joysticks;
-        this.xboxControllers = xboxControllers;
+    public CustomizableOI(HashMap<String, GenericHID> HIDs){
+        // this.joysticks = joysticks;
+        // this.xboxControllers = xboxControllers;
     }
 
-    /**
-     * Returns the available joysticks as a Joystick array. 
-     * @return joysticks the total joysticks available for use.
-     */
-    public Joystick[] getJoysticks(){
-        return joysticks;
-    }
+    // /**
+    //  * Returns the available joysticks as a Joystick array. 
+    //  * @return joysticks the total joysticks available for use.
+    //  */
+    // public Joystick[] getJoysticks(){
+    //     return joysticks;
+    // }
 
-    /**
-     * Returns the available xboxControllers as a XboxController array. 
-     * @return xboxControllers the total xboxControllers available for use.
-     */
-    public XboxController[] getXboxControllers(){
-        return xboxControllers;
-    }
+    // /**
+    //  * Returns the available xboxControllers as a XboxController array. 
+    //  * @return xboxControllers the total xboxControllers available for use.
+    //  */
+    // public XboxController[] getXboxControllers(){
+    //     return xboxControllers;
+    // }
 
 
 }

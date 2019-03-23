@@ -7,15 +7,18 @@
 
 package frc.robot;
 
-/// Java imports
+// Java imports
 import java.lang.reflect.*;
 import java.util.*;
+
 // WPILib imports
 import edu.wpi.first.wpilibj.*;
+import edu.wpi.first.wpilibj.GenericHID.Hand;
 import edu.wpi.first.wpilibj.drive.*;
+
 // My imports
 import frc.robot.*;
-import sun.tools.asm.CatchData;
+
 /**
 * Description here.
 *
@@ -23,51 +26,30 @@ import sun.tools.asm.CatchData;
 * - Non-drive funtionality
 * - Swerve drive
 * - Deadband (should I ever support deadband or is it pointless?)
+* - Joysticks
 *
 * @author Jinhai Yan
 * @version March 2019
 **/
 public class CustomizableRobotDriveBase {
+
 	// Global Variables
 	private static RobotDriveBase drivetrain;
-    private static Method driveMethod;
-	private static Object[] driveParams;
 	// move to main class later.
-	private static CustomizableOI c_OI = new CustomizableOI(new Joystick[1], new XboxController[1]);
+	//private static CustomizableOI c_OI = new CustomizableOI();
+	
 	/**
 	* Constructs a CustomizableRobot object.
 	* 
 	* @param drivetrainType the type of drivetrain used (supports Differential, Meccanum, and Killough).
-	* @param driveMode the style of driving (e.g. For Differential drivetrains, the drive modes are Tank, Arcade, and Curvature).
 	* @param driveMotors the drive motors used, in the form of a hashmap with keys as string labels and values as speed controllers.
 	**/
 	public CustomizableRobotDriveBase (
-		Class<? extends RobotDriveBase> drivetrainType, 
-		String driveMode, 
-		HashMap <String, SpeedController> driveMotors) 
-		throws NoSuchMethodException, 
-		InstantiationException{
+		Class<? extends RobotDriveBase> drivetrainType, HashMap <String, SpeedController> driveMotors) 
+		throws NoSuchMethodException, InstantiationException {
         // Determine drivetrain class.
         switch(drivetrainType.toString()) {
         case "class edu.wpi.first.wpilibj.drive.DifferentialDrive":
-            // Determine drive method.
-			switch(driveMode.toLowerCase()) {
-				case "arcade":
-					//The drive methods won't change (though they might get deprecated) so we can ignore NoSuchMethodException.
-                    driveMethod = drivetrainType.getMethod("arcadeDrive", double.class, double.class, boolean.class);
-					break;
-				case "tank":
-					//The drive methods won't change (though they might get deprecated) so we can ignore NoSuchMethodException.
-					driveMethod = drivetrainType.getMethod("tankDrive", double.class, double.class, boolean.class);
-					break;
-				case "curvature":
-					//The drive methods won't change (though they might get deprecated) so we can ignore NoSuchMethodException.
-					driveMethod = drivetrainType.getMethod("curvatureDrive", double.class, double.class, boolean.class);
-					break;
-				default:
-					System.out.println("Error: This program does not recognize \"" + driveMode + "\" as a drive mode for a differential drivetrain.");
-					break;
-            }
             // Set drivetrain to be a new instance of DifferentialDrive.
 			Constructor<? extends RobotDriveBase> co = drivetrainType.getConstructor(SpeedController.class, SpeedController.class);
 			//Although the RobotDriveBase class is abstract, we are setting drivetrain to a non-abstract subclass, so we can ignore InstantiationException.
@@ -90,13 +72,69 @@ public class CustomizableRobotDriveBase {
             System.exit(1);
         }
     }
-	// Drive method
-	public void drive(){
-		// Example scenario. Replace with a logic-output map later (one with drive params depending on drive method, and with driveJoystick being in a manualy inputted port).
-		Joystick driveJoystick = c_OI.getJoysticks()[0];
-        driveParams[0] = driveJoystick.getX();
-        driveParams[1] = driveJoystick.getY();
-        driveParams[2] = driveJoystick.getZ();
-		driveMethod.invoke(drivetrain, );
+	
+	/**
+	 * Drives the robot using a custom-selected style.
+	 *
+	 * @param driveMode the style of driving (e.g. For Differential drivetrains, the drive modes are Tank, Arcade, and Curvature).
+	 * */
+	public void drive(String driveMode, XboxController driveController){// come up with something better than a string, like a dedicated class with method constants or something.
+		// Determine drive method. The drive method code won't change (though it might get deprecated) so we can ignore NoSuchMethodException.
+		Method driveMethod;
+		switch(driveMode.toLowerCase()) {
+			case "arcade":
+				driveMethod = drivetrainType.getMethod("arcadeDrive", double.class, double.class, boolean.class);
+				break;
+			case "tank":
+				driveMethod = drivetrainType.getMethod("tankDrive", double.class, double.class, boolean.class);
+				break;
+			case "curvature":
+				driveMethod = drivetrainType.getMethod("curvatureDrive", double.class, double.class, boolean.class);
+				break;
+			default:
+				System.out.println("Error: This program does not recognize \"" + driveMode + "\" as a drive mode for a differential drivetrain.");
+				System.exit(1);
+				break;
+		}
+
+		// Invokes the drive method. Parameters differ from method to method, so this case-by-base system is neccessary.
+		switch(driveMethod.toString()){
+			// Drive base: Differential 
+			// Drive style: Arcade
+			case "public void edu.wpi.first.wpilibj.drive.DifferentialDrive.arcadeDrive(double,double,boolean)":
+				try{
+					driveMethod.invoke(drivetrain, driveController.getY(Hand.kLeft), driveController.getX(Hand.kRight));
+				}catch(IllegalAccessException | InvocationTargetException e){
+					System.out.println(e);
+					System.exit(1);
+				}
+				break;
+			// Drive base: Differential 
+			// Drive style: Tank
+			case "public void edu.wpi.first.wpilibj.drive.DifferentialDrive.tankDrive(double,double,boolean)":
+				try{
+					driveMethod.invoke(drivetrain, );
+				}catch(IllegalAccessException | InvocationTargetException e){
+					System.out.println(e);
+					System.exit(1);
+				}
+				break;
+			// Drive base: Differential 
+			// Drive style: Curvature
+			case "public void edu.wpi.first.wpilibj.drive.DifferentialDrive.curvatureDrive(double,double,boolean)":
+				try{
+					driveMethod.invoke(drivetrain, );
+				}catch(IllegalAccessException | InvocationTargetException e){
+					System.out.println(e);
+					System.exit(1);
+				}
+				break;
+			default:
+				// Should never happen.
+				System.out.println("Error: This program is broken. Please contact the developers by whichever means possible to resolve this issue.");
+				break;
+		}
+		//driveMethod.invoke(drivetrain, );
+
 	}
 }
