@@ -7,7 +7,13 @@
 
 package frc.robot;
 
-import edu.wpi.first.wpilibj.TimedRobot;
+// Java imports
+import java.util.*;
+
+// WPILib imports
+import edu.wpi.first.wpilibj.*;
+import edu.wpi.first.wpilibj.drive.*;
+import frc.robot.CustomizableRobotDriveBase.DriveMode;
 
 /**
  * The VM is configured to automatically run this class, and to call the
@@ -17,13 +23,16 @@ import edu.wpi.first.wpilibj.TimedRobot;
  * project.
  */
 public class Robot extends TimedRobot {
-  /**
-   * This function is run when the robot is first started up and should be used
-   * for any initialization code.
-   */
+  
+  XboxController mainController = new XboxController(0);
+  CustomizableRobotDriveBase drivetrain;
+  
   @Override
   public void robotInit() {
-
+    HashMap<String, SpeedController> h = new HashMap<String, SpeedController>();
+    h.put("Right Drive Motors", new Victor(0));
+    h.put("Left Drive Motors", new Victor(1));
+    drivetrain = new CustomizableRobotDriveBase(DifferentialDrive.class, h);
   }
 
   @Override
@@ -40,6 +49,7 @@ public class Robot extends TimedRobot {
 
   @Override
   public void teleopPeriodic() {
+    drivetrain.drive(DriveMode.arcade, mainController);
   }
 
   @Override

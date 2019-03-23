@@ -25,7 +25,7 @@ public class Customizer {
 
     private static void customizeDriveMotorPorts(){
         Scanner consoleScanner = new Scanner(System.in);
-        System.out.println("How many drive speedcontrollers do you have?");
+        System.out.println("How many speedcontrollers do you use for your drive train?");
         String userInput = consoleScanner.nextLine();
         int numberOfDriveMotors;
         while(true){
