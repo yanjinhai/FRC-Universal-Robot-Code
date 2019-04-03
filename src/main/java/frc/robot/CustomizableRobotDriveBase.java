@@ -22,65 +22,102 @@ import edu.wpi.first.wpilibj.drive.*;
 /**
 * Description here.
 *
-* Does not currently care to support:
+* Does not currently support:
 * - Funtionality outside of driving
 * - Swerve drive
-* - Deadband (should I ever support deadband or is it pointless?)
+* - Deadband (should I support deadband at all or is it pointless?)
 * - Joysticks
+* - Optional Values (squared inputs, quick turn, field-oriented)
 *
 * @author Jinhai Yan
-* @version March 2019
+* @version April 2019
 **/
 public class CustomizableRobotDriveBase {
 
 	// Global Variables
 	private static RobotDriveBase drivetrain;
-	
+	private static Object[] driveParams;
+
 	// move to main class later.
 	//private static CustomizableOI c_OI = new CustomizableOI();
 	
 	/**
-	* Constructs a CustomizableRobot object.
+	 * The class of the robot's drivetrain. Used in when constructing a new instance of CustomizableRobotDriveBase;
+	 */
+	public static enum DriveBase {
+		DIFFERENTIAL, MECANUM, KILLOUGH;
+	}
+
+	/**
+	 * The style of driving. Used in conjunction with CustomizableRobotDriveBase.drive().
+	 */
+	public static enum DriveMode {
+		ARCADE, TANK, CURVATURE;
+	}
+
+	/**
+	* Constructs a CustomizableRobotDriveBase object.
 	* 
 	* @param drivetrainType the type of drivetrain used (supports Differential, Meccanum, and Killough).
 	* @param driveMotors the drive motors used, in the form of a hashmap with keys as string labels and values as speed controllers.
 	**/
 	public CustomizableRobotDriveBase (
-		Class<? extends RobotDriveBase> drivetrainType, HashMap <String, SpeedController> driveMotors) {
+		DriveBase drivetrainType, HashMap <String, SpeedController> driveMotors) {
         // Determine drivetrain class.
-        switch(drivetrainType.toString()) {
-        case "class edu.wpi.first.wpilibj.drive.DifferentialDrive":
+        switch(drivetrainType) {
+        case DIFFERENTIAL:
             /* Set drivetrain to be a new instance of DifferentialDrive.
 			Although the RobotDriveBase class is abstract, we are setting drivetrain to a non-abstract subclass, 
 			so we can ignore InstantiationException.*/
 			try{
-				Constructor<? extends RobotDriveBase> co = drivetrainType.getConstructor(SpeedController.class, SpeedController.class);
-				drivetrain = co.newInstance(driveMotors.get("Left Drive Motors"), driveMotors.get("Right Drive Motors"));
+				Constructor<DifferentialDrive> co = DifferentialDrive.class.getConstructor(SpeedController.class, SpeedController.class);
+				drivetrain = co.newInstance(driveMotors.get("Left"), driveMotors.get("Right"));
 			}catch(IllegalAccessException | InvocationTargetException e){
 				System.out.println(e);
 				System.exit(1);
 			}catch(NoSuchMethodException | InstantiationException e){
-				// Shoudn't ever happen. Ignore.
+				// This occurs only when we cannot create a new instance of DifferentialDrive, meaning that WPI has changed their library. 
+				System.out.println("Error: " + this.getClass() + " is out of date. Try using the standard WPI drive classes instead.");
+				System.exit(1);
 			}
 			break;
-		case "class edu.wpi.first.wpilibj.drive.MecanumDrive":
-			// Implement later
+		case MECANUM:
+			/* Set drivetrain to be a new instance of MecanumDrive.
+			Although the RobotDriveBase class is abstract, we are setting drivetrain to a non-abstract subclass, 
+			so we can ignore InstantiationException.*/
+			try{
+				Constructor<MecanumDrive> co = MecanumDrive.class.getConstructor(SpeedController.class, SpeedController.class, SpeedController.class, SpeedController.class);
+				drivetrain = co.newInstance(driveMotors.get("Front Left"), driveMotors.get("Rear Left"), driveMotors.get("Front Right"), driveMotors.get("Rear Right"));
+			}catch(IllegalAccessException | InvocationTargetException e){
+				System.out.println(e);
+				System.exit(1);
+			}catch(NoSuchMethodException | InstantiationException e){
+				// This occurs only when we cannot create a new instance of MecanumDrive, meaning that WPI has changed their library. 
+				System.out.println("Error: " + this.getClass() + " is out of date. Try using the standard WPI drive classes instead.");
+				System.exit(1);
+			}
 			break;
-		case "class edu.wpi.first.wpilibj.drive.KilloughDrive":
-			// Implement later
+		case KILLOUGH:
+			/* Set drivetrain to be a new instance of KilloughDrive.
+			Although the RobotDriveBase class is abstract, we are setting drivetrain to a non-abstract subclass, 
+			so we can ignore InstantiationException.*/
+			try{
+				Constructor<KilloughDrive> co = KilloughDrive.class.getConstructor(SpeedController.class, SpeedController.class, SpeedController.class);
+				drivetrain = co.newInstance(driveMotors.get("Left"), driveMotors.get("Right"), driveMotors.get("Back"));
+			}catch(IllegalAccessException | InvocationTargetException e){
+				System.out.println(e);
+				System.exit(1);
+			}catch(NoSuchMethodException | InstantiationException e){
+				// This occurs only when we cannot create a new instance of KilloughDrive, meaning that WPI has changed their library. 
+				System.out.println("Error: " + this.getClass() + " is out of date. Try using the standard WPI drive classes instead.");
+				System.exit(1);
+			}
 			break;
         default:
-            // Only executes if variable drivetrainType is not a recognized subclass of RobotDriveBase.
-            System.out.println("Error: Unrecognized drivetrain class."); 
+            // Only executes if input drivetrain type is not a recognized subclass of RobotDriveBase.
+            System.out.println("Error: Unrecognized drivetrain class. " + this.getClass() + " recognizes only DifferentialDrive, MeccanumDrive, and KilloughDrive"); 
             System.exit(1);
         }
-	}
-	
-	/**
-	 * The style of driving. Used in conjunction with CustomizableRobotDriveBase.drive().
-	 */
-	public static enum DriveMode {
-		arcade, tank, curvature;
 	}
 
 	/**
@@ -88,7 +125,7 @@ public class CustomizableRobotDriveBase {
 	 *
 	 * @param driveMode the style of driving (e.g. For Differential drivetrains, the drive modes are Tank, Arcade, and Curvature).
 	 * */
-	public void drive(DriveMode driveMode, XboxController driveController) {// come up with something better than a string for drive mode, like a dedicated class with method constants or something.
+	public void drive(DriveMode driveMode, XboxController driveController) {
 		
 		// Determine drive method. The drive method code won't change (though it might get deprecated) so we can ignore NoSuchMethodException.
 		Method driveMethod = null;
@@ -96,18 +133,31 @@ public class CustomizableRobotDriveBase {
 			Class<? extends RobotDriveBase> drivetrainType = drivetrain.getClass();
 			switch(drivetrainType.toString()) {
 				case "class edu.wpi.first.wpilibj.drive.DifferentialDrive":
-					switch(driveMode.toString()) {
-						case "arcade":
-							driveMethod = drivetrainType.getMethod("arcadeDrive", double.class, double.class, boolean.class);
+					switch(driveMode) {
+						case ARCADE:
+							driveMethod = drivetrainType.getMethod("arcadeDrive", double.class, double.class);
+							// Set parameters
+							driveParams = new Object[2];
+							driveParams[0] = driveController.getY(Hand.kLeft);
+							driveParams[1] = driveController.getX(Hand.kRight);
 							break;
-						case "tank":
-							driveMethod = drivetrainType.getMethod("tankDrive", double.class, double.class, boolean.class);
+						case TANK:
+							driveMethod = drivetrainType.getMethod("tankDrive", double.class, double.class);
+							// Set parameters
+							driveParams = new Object[2];
+							driveParams[0] = driveController.getY(Hand.kLeft);
+							driveParams[1] = driveController.getY(Hand.kRight);
 							break;
-						case "curvature":
-							driveMethod = drivetrainType.getMethod("curvatureDrive", double.class, double.class, boolean.class);
+						case CURVATURE:
+							driveMethod = drivetrainType.getMethod("curvatureDrive", double.class, double.class);
+							// Set parameters
+							driveParams = new Object[2];
+							driveParams[0] = driveController.getY(Hand.kLeft);
+							driveParams[1] = driveController.getX(Hand.kRight);
 							break;
 						default:
-							System.out.println("Error: This program does not recognize \"" + driveMode + "\" as a drive mode for a differential drivetrain.");
+							System.out.println("Error: This program does not recognize \"" + driveMode + 
+							"\" as a drive mode for a differential drivetrain.");
 							System.exit(1);
 							break;
 					}
@@ -118,42 +168,18 @@ public class CustomizableRobotDriveBase {
 				case "class edu.wpi.first.wpilibj.drive.KilloughDrive":
 					// Implement later
 					break;
-			}
+			}	
 		}catch(NoSuchMethodException e){
-			// Shouldn't ever happen. ignore.
+			// This occurs only when the methods of the drive class changes somehow, meaning that WPI has changed their library. 
+			System.out.println("Error: " + this.getClass() + " is out of date. Try using the standard WPI drive classes instead.");
+			System.exit(1);
 		}
-		// Invokes the drive method. Parameters differ from method to method, so I used this case-by-case system.
-		switch(driveMethod.toString()){
-			// Drive base: Differential 
-			// Drive style: Arcade
-			case "public void edu.wpi.first.wpilibj.drive.DifferentialDrive.arcadeDrive(double,double,boolean)":
-				try{
-					driveMethod.invoke(drivetrain, driveController.getY(Hand.kLeft), driveController.getX(Hand.kRight));
-				}catch(IllegalAccessException | InvocationTargetException e){
-					System.out.println(e);
-					System.exit(1);
-				}
-				break;
-			// Drive base: Differential 
-			// Drive style: Tank
-			case "public void edu.wpi.first.wpilibj.drive.DifferentialDrive.tankDrive(double,double,boolean)":
-				try{
-					driveMethod.invoke(drivetrain, driveController.getY(Hand.kLeft), driveController.getY(Hand.kRight));
-				}catch(IllegalAccessException | InvocationTargetException e){
-					System.out.println(e);
-					System.exit(1);
-				}
-				break;
-			// Drive base: Differential 
-			// Drive style: Curvature ("Cheesy")
-			case "public void edu.wpi.first.wpilibj.drive.DifferentialDrive.curvatureDrive(double,double,boolean)":
-				try{
-					driveMethod.invoke(drivetrain, driveController.getY(Hand.kLeft), driveController.getX(Hand.kRight));
-				}catch(IllegalAccessException | InvocationTargetException e){
-					System.out.println(e);
-					System.exit(1);
-				}
-				break;
-		}
+		// Invoke the drive method.
+		try{
+			driveMethod.invoke(drivetrain, driveParams);
+		}catch(IllegalAccessException | InvocationTargetException e){
+			System.out.println(e);
+			System.exit(1);
+		}		
 	}
 }

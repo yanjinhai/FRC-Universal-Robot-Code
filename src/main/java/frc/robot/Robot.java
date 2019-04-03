@@ -13,6 +13,7 @@ import java.util.*;
 // WPILib imports
 import edu.wpi.first.wpilibj.*;
 import edu.wpi.first.wpilibj.drive.*;
+import frc.robot.CustomizableRobotDriveBase.DriveBase;
 import frc.robot.CustomizableRobotDriveBase.DriveMode;
 
 /**
@@ -26,13 +27,14 @@ public class Robot extends TimedRobot {
   
   XboxController mainController = new XboxController(0);
   CustomizableRobotDriveBase drivetrain;
-  
+
   @Override
   public void robotInit() {
-    HashMap<String, SpeedController> h = new HashMap<String, SpeedController>();
-    h.put("Right Drive Motors", new Victor(0));
-    h.put("Left Drive Motors", new Victor(1));
-    drivetrain = new CustomizableRobotDriveBase(DifferentialDrive.class, h);
+    HashMap<String, SpeedController> driveMotors = new HashMap<String, SpeedController>();
+    driveMotors.put("Right", new Victor(0));
+    driveMotors.put("Left", new Victor(1));
+    drivetrain = new CustomizableRobotDriveBase(DriveBase.DIFFERENTIAL, driveMotors);
+    drivetrain.drive(DriveMode.ARCADE, mainController);
   }
 
   @Override
