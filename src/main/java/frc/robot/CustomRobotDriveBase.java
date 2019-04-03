@@ -20,10 +20,11 @@ import edu.wpi.first.wpilibj.drive.*;
 //import frc.robot.*;
 
 /**
-* Description here.
-*
+* A class that can be used as any WPI drive class, all in one.
+* <p>
 * Does not currently support:
-* - Funtionality outside of driving
+* <p>
+* - Funtionality outside of driving 
 * - Swerve drive
 * - Deadband (should I support deadband at all or is it pointless?)
 * - Joysticks
@@ -32,36 +33,33 @@ import edu.wpi.first.wpilibj.drive.*;
 * @author Jinhai Yan
 * @version April 2019
 **/
-public class CustomizableRobotDriveBase {
+public class CustomRobotDriveBase {
 
 	// Global Variables
 	private static RobotDriveBase drivetrain;
 	private static Object[] driveParams;
-
-	// move to main class later.
-	//private static CustomizableOI c_OI = new CustomizableOI();
 	
 	/**
-	 * The class of the robot's drivetrain. Used in when constructing a new instance of CustomizableRobotDriveBase;
+	 * The class of the robot's drivetrain. Used in when constructing a new instance of CustomRobotDriveBase;
 	 */
 	public static enum DriveBase {
 		DIFFERENTIAL, MECANUM, KILLOUGH;
 	}
 
 	/**
-	 * The style of driving. Used in conjunction with CustomizableRobotDriveBase.drive().
+	 * The style of driving. Used in conjunction with CustomRobotDriveBase.drive().
 	 */
 	public static enum DriveMode {
 		ARCADE, TANK, CURVATURE;
 	}
 
 	/**
-	* Constructs a CustomizableRobotDriveBase object.
+	* Constructs a CustomRobotDriveBase object.
 	* 
 	* @param drivetrainType the type of drivetrain used (supports Differential, Meccanum, and Killough).
 	* @param driveMotors the drive motors used, in the form of a hashmap with keys as string labels and values as speed controllers.
 	**/
-	public CustomizableRobotDriveBase (
+	public CustomRobotDriveBase (
 		DriveBase drivetrainType, HashMap <String, SpeedController> driveMotors) {
         // Determine drivetrain class.
         switch(drivetrainType) {
@@ -124,10 +122,9 @@ public class CustomizableRobotDriveBase {
 	 * Drives the robot using a custom-selected style.
 	 *
 	 * @param driveMode the style of driving (e.g. For Differential drivetrains, the drive modes are Tank, Arcade, and Curvature).
+	 * @param driveController the xbox controller used to drive the robot.
 	 * */
 	public void drive(DriveMode driveMode, XboxController driveController) {
-		
-		// Determine drive method. The drive method code won't change (though it might get deprecated) so we can ignore NoSuchMethodException.
 		Method driveMethod = null;
 		try{
 			Class<? extends RobotDriveBase> drivetrainType = drivetrain.getClass();
@@ -181,5 +178,14 @@ public class CustomizableRobotDriveBase {
 			System.out.println(e);
 			System.exit(1);
 		}		
+	}
+
+	/**
+	 * Returns the drive base.
+	 * 
+	 * @return the drive base.
+	 */
+	public RobotDriveBase driveBase(){
+		return drivetrain;
 	}
 }
