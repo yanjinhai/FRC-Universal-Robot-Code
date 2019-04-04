@@ -15,6 +15,9 @@ import edu.wpi.first.wpilibj.*;
 import frc.robot.CustomRobotDriveBase.DriveBase;
 import frc.robot.CustomRobotDriveBase.DriveMode;
 
+// CTRE imports
+import com.ctre.phoenix.motorcontrol.can.TalonSRX;
+
 /**
  * The VM is configured to automatically run this class, and to call the
  * functions corresponding to each mode, as described in the TimedRobot
@@ -30,9 +33,10 @@ public class Robot extends TimedRobot {
   @Override
   public void robotInit() {
     HashMap<String, SpeedController> driveMotors = new HashMap<String, SpeedController>();
-    driveMotors.put("Right", new Victor(0));
-    driveMotors.put("Left", new Victor(1));
+    driveMotors.put("Right", new TalonSRX(3));
+    driveMotors.put("Left", new TalonSRX(4));
     drivetrain = new CustomRobotDriveBase(DriveBase.DIFFERENTIAL, driveMotors);
+    System.out.println("");
   }
 
   @Override

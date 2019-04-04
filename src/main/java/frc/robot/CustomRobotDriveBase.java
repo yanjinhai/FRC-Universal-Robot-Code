@@ -174,6 +174,7 @@ public class CustomRobotDriveBase {
 		// Invoke the drive method.
 		try{
 			driveMethod.invoke(drivetrain, driveParams);
+			System.out.println();
 		}catch(IllegalAccessException | InvocationTargetException e){
 			System.out.println(e);
 			System.exit(1);

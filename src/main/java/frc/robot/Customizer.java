@@ -39,10 +39,10 @@ public class Customizer {
         SpeedController[] driveMotors = new SpeedController[numberOfDriveMotors];
         for(int i = 0; i < numberOfDriveMotors; i++){
             System.out.println("What is the PWM Channel/CAN ID.");
-            switch(){
+            // switch(){
 
-            }
-            driveMotors[i] = new;
+            // }
+            // driveMotors[i] = new;
         }
         consoleScanner.close();
     }
