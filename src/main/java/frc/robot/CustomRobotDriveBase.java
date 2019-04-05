@@ -64,7 +64,7 @@ public class CustomRobotDriveBase {
         // Determine drivetrain class.
         switch(drivetrainType) {
         case DIFFERENTIAL:
-            /* Set drivetrain to be a new instance of DifferentialDrive.
+            /* Set drivetrain to be a new instance of DifferentialDrive. 
 			Although the RobotDriveBase class is abstract, we are setting drivetrain to a non-abstract subclass, 
 			so we can ignore InstantiationException.*/
 			try{
@@ -135,22 +135,23 @@ public class CustomRobotDriveBase {
 							driveMethod = drivetrainType.getMethod("arcadeDrive", double.class, double.class);
 							// Set parameters
 							driveParams = new Object[2];
-							driveParams[0] = driveController.getY(Hand.kLeft);
-							driveParams[1] = driveController.getX(Hand.kRight);
+							driveParams[0] = driveController.getX(Hand.kRight);
+							driveParams[1] = driveController.getY(Hand.kLeft);
 							break;
 						case TANK:
 							driveMethod = drivetrainType.getMethod("tankDrive", double.class, double.class);
 							// Set parameters
 							driveParams = new Object[2];
-							driveParams[0] = driveController.getY(Hand.kLeft);
-							driveParams[1] = driveController.getY(Hand.kRight);
+							driveParams[0] = driveController.getY(Hand.kRight);
+							driveParams[1] = driveController.getY(Hand.kLeft);
 							break;
 						case CURVATURE:
-							driveMethod = drivetrainType.getMethod("curvatureDrive", double.class, double.class);
+							driveMethod = drivetrainType.getMethod("curvatureDrive", double.class, double.class, boolean.class);
 							// Set parameters
-							driveParams = new Object[2];
-							driveParams[0] = driveController.getY(Hand.kLeft);
-							driveParams[1] = driveController.getX(Hand.kRight);
+							driveParams = new Object[3];
+							driveParams[0] = driveController.getX(Hand.kRight);
+							driveParams[1] = driveController.getY(Hand.kLeft);
+							driveParams[2] = true;
 							break;
 						default:
 							System.out.println("Error: This program does not recognize \"" + driveMode + 

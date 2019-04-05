@@ -12,11 +12,12 @@ import java.util.*;
 
 // WPILib imports
 import edu.wpi.first.wpilibj.*;
+import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import frc.robot.CustomRobotDriveBase.DriveBase;
 import frc.robot.CustomRobotDriveBase.DriveMode;
 
 // CTRE imports
-import com.ctre.phoenix.motorcontrol.can.TalonSRX;
+//import com.ctre.phoenix.motorcontrol.can.TalonSRX;
 
 /**
  * The VM is configured to automatically run this class, and to call the
@@ -29,14 +30,18 @@ public class Robot extends TimedRobot {
   
   XboxController mainController = new XboxController(0);
   CustomRobotDriveBase drivetrain;
+  //DifferentialDrive a;
 
   @Override
   public void robotInit() {
     HashMap<String, SpeedController> driveMotors = new HashMap<String, SpeedController>();
-    driveMotors.put("Right", new TalonSRX(3));
-    driveMotors.put("Left", new TalonSRX(4));
-    drivetrain = new CustomRobotDriveBase(DriveBase.DIFFERENTIAL, driveMotors);
-    System.out.println("");
+    driveMotors.put("Front Right", new Victor(0));
+    driveMotors.put("Front Left", new Victor(1));
+    driveMotors.put("Back Right", new Victor(2));
+    driveMotors.put("Back Left", new Victor(3));
+    drivetrain = new CustomRobotDriveBase(DriveBase.MECANUM, driveMotors);
+    // System.out.println("#####" + drivetrain.driveBase());
+    // System.out.println("#####" + drivetrain.driveBase().getClass());
   }
 
   @Override
@@ -53,7 +58,7 @@ public class Robot extends TimedRobot {
 
   @Override
   public void teleopPeriodic() {
-    drivetrain.drive(DriveMode.ARCADE, mainController);
+    drivetrain.drive(DriveMode., mainController);
   }
 
   @Override
