@@ -12,7 +12,6 @@ import java.util.*;
 
 // WPILib imports
 import edu.wpi.first.wpilibj.*;
-import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import frc.robot.CustomRobotDriveBase.DriveBase;
 import frc.robot.CustomRobotDriveBase.DriveMode;
 
@@ -35,10 +34,14 @@ public class Robot extends TimedRobot {
   @Override
   public void robotInit() {
     HashMap<String, SpeedController> driveMotors = new HashMap<String, SpeedController>();
-    driveMotors.put("Front Right", new Victor(0));
-    driveMotors.put("Front Left", new Victor(1));
-    driveMotors.put("Back Right", new Victor(2));
-    driveMotors.put("Back Left", new Victor(3));
+    // driveMotors.put("Right", new Victor(0));
+    // driveMotors.put("Left", new Victor(1));
+    Victor motor0 = new Victor(0);
+    motor0.setInverted(true);
+    driveMotors.put("Front Right", new Victor(1));
+    driveMotors.put("Front Left", new Victor(2));
+    driveMotors.put("Rear Right", motor0);
+    driveMotors.put("Rear Left", new Victor(3));
     drivetrain = new CustomRobotDriveBase(DriveBase.MECANUM, driveMotors);
     // System.out.println("#####" + drivetrain.driveBase());
     // System.out.println("#####" + drivetrain.driveBase().getClass());
@@ -58,7 +61,7 @@ public class Robot extends TimedRobot {
 
   @Override
   public void teleopPeriodic() {
-    drivetrain.drive(DriveMode., mainController);
+    drivetrain.drive(DriveMode.CARTESIAN, mainController);
   }
 
   @Override

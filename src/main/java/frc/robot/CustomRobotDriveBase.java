@@ -50,7 +50,7 @@ public class CustomRobotDriveBase {
 	 * The style of driving. Used in conjunction with CustomRobotDriveBase.drive().
 	 */
 	public static enum DriveMode {
-		ARCADE, TANK, CURVATURE;
+		ARCADE, TANK, CURVATURE, CARTESIAN, POLAR;
 	}
 
 	/**
@@ -61,61 +61,35 @@ public class CustomRobotDriveBase {
 	**/
 	public CustomRobotDriveBase (
 		DriveBase drivetrainType, HashMap <String, SpeedController> driveMotors) {
-        // Determine drivetrain class.
-        switch(drivetrainType) {
-        case DIFFERENTIAL:
-            /* Set drivetrain to be a new instance of DifferentialDrive. 
-			Although the RobotDriveBase class is abstract, we are setting drivetrain to a non-abstract subclass, 
-			so we can ignore InstantiationException.*/
-			try{
-				Constructor<DifferentialDrive> co = DifferentialDrive.class.getConstructor(SpeedController.class, SpeedController.class);
+		// Determine drivetrain class.
+		try{
+			Constructor<? extends RobotDriveBase> co;
+			switch(drivetrainType) {
+			case DIFFERENTIAL:
+				// Set drivetrain to be a new instance of DifferentialDrive. 
+				co = DifferentialDrive.class.getConstructor(SpeedController.class, SpeedController.class);
 				drivetrain = co.newInstance(driveMotors.get("Left"), driveMotors.get("Right"));
-			}catch(IllegalAccessException | InvocationTargetException e){
-				System.out.println(e);
-				System.exit(1);
-			}catch(NoSuchMethodException | InstantiationException e){
-				// This occurs only when we cannot create a new instance of DifferentialDrive, meaning that WPI has changed their library. 
-				System.out.println("Error: " + this.getClass() + " is out of date. Try using the standard WPI drive classes instead.");
-				System.exit(1);
-			}
-			break;
-		case MECANUM:
-			/* Set drivetrain to be a new instance of MecanumDrive.
-			Although the RobotDriveBase class is abstract, we are setting drivetrain to a non-abstract subclass, 
-			so we can ignore InstantiationException.*/
-			try{
-				Constructor<MecanumDrive> co = MecanumDrive.class.getConstructor(SpeedController.class, SpeedController.class, SpeedController.class, SpeedController.class);
+				break;
+			case MECANUM:
+				// Set drivetrain to be a new instance of MecanumDrive. 
+				co = MecanumDrive.class.getConstructor(SpeedController.class, SpeedController.class, SpeedController.class, SpeedController.class);
 				drivetrain = co.newInstance(driveMotors.get("Front Left"), driveMotors.get("Rear Left"), driveMotors.get("Front Right"), driveMotors.get("Rear Right"));
-			}catch(IllegalAccessException | InvocationTargetException e){
-				System.out.println(e);
-				System.exit(1);
-			}catch(NoSuchMethodException | InstantiationException e){
-				// This occurs only when we cannot create a new instance of MecanumDrive, meaning that WPI has changed their library. 
-				System.out.println("Error: " + this.getClass() + " is out of date. Try using the standard WPI drive classes instead.");
-				System.exit(1);
-			}
-			break;
-		case KILLOUGH:
-			/* Set drivetrain to be a new instance of KilloughDrive.
-			Although the RobotDriveBase class is abstract, we are setting drivetrain to a non-abstract subclass, 
-			so we can ignore InstantiationException.*/
-			try{
-				Constructor<KilloughDrive> co = KilloughDrive.class.getConstructor(SpeedController.class, SpeedController.class, SpeedController.class);
+				break;
+			case KILLOUGH:
+				// Set drivetrain to be a new instance of KilloughDrive.
+				co = KilloughDrive.class.getConstructor(SpeedController.class, SpeedController.class, SpeedController.class);
 				drivetrain = co.newInstance(driveMotors.get("Left"), driveMotors.get("Right"), driveMotors.get("Back"));
-			}catch(IllegalAccessException | InvocationTargetException e){
-				System.out.println(e);
-				System.exit(1);
-			}catch(NoSuchMethodException | InstantiationException e){
-				// This occurs only when we cannot create a new instance of KilloughDrive, meaning that WPI has changed their library. 
-				System.out.println("Error: " + this.getClass() + " is out of date. Try using the standard WPI drive classes instead.");
-				System.exit(1);
+				break;
+			default:
+				// Only executes if input drivetrain type is not a recognized subclass of RobotDriveBase.
+				printError("Error: Unrecognized drivetrain class. " + this.getClass() + " recognizes only DifferentialDrive, MeccanumDrive, and KilloughDrive"); 
 			}
-			break;
-        default:
-            // Only executes if input drivetrain type is not a recognized subclass of RobotDriveBase.
-            System.out.println("Error: Unrecognized drivetrain class. " + this.getClass() + " recognizes only DifferentialDrive, MeccanumDrive, and KilloughDrive"); 
-            System.exit(1);
-        }
+		} catch(IllegalAccessException | InvocationTargetException e){
+			printException(e);
+		}catch(NoSuchMethodException | InstantiationException e){
+			// This occurs only when we cannot create a new instance of KilloughDrive, meaning that WPI has changed their library. 
+			printError("Error: " + this.getClass() + " is out of date. Try using the standard WPI drive classes instead.");
+		} 
 	}
 
 	/**
@@ -134,51 +108,64 @@ public class CustomRobotDriveBase {
 						case ARCADE:
 							driveMethod = drivetrainType.getMethod("arcadeDrive", double.class, double.class);
 							// Set parameters
-							driveParams = new Object[2];
+							driveParams = new Object[driveMethod.getParameterCount()];
 							driveParams[0] = driveController.getX(Hand.kRight);
 							driveParams[1] = driveController.getY(Hand.kLeft);
 							break;
 						case TANK:
 							driveMethod = drivetrainType.getMethod("tankDrive", double.class, double.class);
 							// Set parameters
-							driveParams = new Object[2];
+							driveParams = new Object[driveMethod.getParameterCount()];
 							driveParams[0] = driveController.getY(Hand.kRight);
 							driveParams[1] = driveController.getY(Hand.kLeft);
 							break;
 						case CURVATURE:
 							driveMethod = drivetrainType.getMethod("curvatureDrive", double.class, double.class, boolean.class);
 							// Set parameters
-							driveParams = new Object[3];
+							driveParams = new Object[driveMethod.getParameterCount()];
 							driveParams[0] = driveController.getX(Hand.kRight);
 							driveParams[1] = driveController.getY(Hand.kLeft);
 							driveParams[2] = true;
 							break;
 						default:
-							System.out.println("Error: This program does not recognize \"" + driveMode + 
+							printError("Error: This program does not recognize \"" + driveMode + 
 							"\" as a drive mode for a differential drivetrain.");
-							System.exit(1);
 							break;
 					}
 					break;
 				case "class edu.wpi.first.wpilibj.drive.MecanumDrive":
-					// Implement later
-					break;
+					switch(driveMode){
+						case CARTESIAN:
+							driveMethod = drivetrainType.getMethod("driveCartesian", double.class, double.class, double.class);
+							break;
+						case POLAR:
+							driveMethod = drivetrainType.getMethod("tankDrive", double.class, double.class, double.class);
+							break;
+						default:
+							printError("Error: This program does not recognize \"" + driveMode + 
+							"\" as a drive mode for a mecanum drivetrain.");
+							break;
+					}
+					// Set parameters. These parameters are the same for both drive modes, so they are outside the switch statement.
+					driveParams = new Object[driveMethod.getParameterCount()];
+					driveParams[0] = driveController.getY(Hand.kLeft);
+					driveParams[1] = driveController.getX(Hand.kLeft);
+					driveParams[2] = driveController.getX(Hand.kRight);
+					break; 
 				case "class edu.wpi.first.wpilibj.drive.KilloughDrive":
 					// Implement later
 					break;
 			}	
 		}catch(NoSuchMethodException e){
 			// This occurs only when the methods of the drive class changes somehow, meaning that WPI has changed their library. 
-			System.out.println("Error: " + this.getClass() + " is out of date. Try using the standard WPI drive classes instead.");
-			System.exit(1);
+			printError("Error: " + this.getClass() + " is out of date. Try using the standard WPI drive classes instead.");
 		}
 		// Invoke the drive method.
 		try{
 			driveMethod.invoke(drivetrain, driveParams);
 			System.out.println();
 		}catch(IllegalAccessException | InvocationTargetException e){
-			System.out.println(e);
-			System.exit(1);
+			printException(e);
 		}		
 	}
 
@@ -189,5 +176,25 @@ public class CustomRobotDriveBase {
 	 */
 	public RobotDriveBase driveBase(){
 		return drivetrain;
+	}
+
+	/**
+	 * Wrapper for printing the input error as a string. Terminates the system directly afterwards
+	 * 
+	 * @param e the error to print
+	 */
+	private static void printError(String e){
+		System.out.println(e);
+		System.exit(1);
+	}
+
+	/**
+	 * Wrapper method for printing the stacktrace of input exception. Terminates the system directly afterwards.
+	 * 
+	 * @param e the exception to print
+	 */
+	private static void printException(Exception e){
+		e.printStackTrace();
+		System.exit(1);
 	}
 }
