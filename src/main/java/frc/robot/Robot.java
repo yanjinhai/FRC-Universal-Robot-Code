@@ -36,17 +36,16 @@ public class Robot extends TimedRobot {
     HashMap<String, SpeedController> driveMotors = new HashMap<String, SpeedController>();
     // driveMotors.put("Right", new Victor(0));
     // driveMotors.put("Left", new Victor(1));
-    Victor motor0 = new Victor(0);
+    Victor motor0 = new Victor(3);
     Victor motor1 = new Victor(1);
-    Victor motor2 = new Victor(2);
-    Victor motor3 = new Victor(3);
+    Victor motor2 = new Victor(0);
+    Victor motor3 = new Victor(2);
     motor0.setInverted(true);
     driveMotors.put("Front Right", motor1);
     driveMotors.put("Front Left", motor2);
     driveMotors.put("Rear Right", motor0);
     driveMotors.put("Rear Left", motor3);
     drivetrain = new CustomRobotDriveBase(DriveBase.MECANUM, driveMotors);
-
     // System.out.println("#####" + drivetrain.driveBase());
     // System.out.println("#####" + drivetrain.driveBase().getClass());
   }
@@ -65,7 +64,7 @@ public class Robot extends TimedRobot {
 
   @Override
   public void teleopPeriodic() {
-    drivetrain.drive(DriveMode.CARTESIAN, mainController);
+    drivetrain.drive(DriveMode.POLAR, mainController);
   }
 
   @Override

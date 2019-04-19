@@ -129,7 +129,7 @@ public class CustomRobotDriveBase {
 	 * @param driveMode the style of driving (e.g. For Differential drivetrains, the drive modes are Tank, Arcade, and Curvature).
 	 * @param driveController the xbox controller used to drive the robot.
 	 */
-	public void drive(DriveMode driveMode, XboxController driveController) {
+	public void drive(DriveMode driveMode, GenericHID driveController) {
 		Method driveMethod = null;
 		try{
 			Class<? extends RobotDriveBase> drivetrainType = this.drivetrain.getClass();
@@ -168,20 +168,25 @@ public class CustomRobotDriveBase {
 					switch(driveMode){
 						case CARTESIAN:
 							driveMethod = drivetrainType.getMethod("driveCartesian", double.class, double.class, double.class);
+							// Set parameters.
+							driveParams = new Object[driveMethod.getParameterCount()];
+							driveParams[0] = driveController.getX(Hand.kLeft);
+							driveParams[1] = driveController.getY(Hand.kLeft);
+							driveParams[2] = driveController.getX(Hand.kRight);
 							break;
 						case POLAR:
 							driveMethod = drivetrainType.getMethod("drivePolar", double.class, double.class, double.class);
+							// Set parameters.
+							driveParams = new Object[driveMethod.getParameterCount()];
+							driveParams[0] = driveController.getY(Hand.kLeft);
+							driveParams[1] = driveController.getX(Hand.kLeft);
+							driveParams[2] = driveController.getX(Hand.kRight);
 							break;
 						default:
 							printError("Error: This program does not recognize \"" + driveMode + 
 							"\" as a drive mode for a mecanum drivetrain.");
 							break;
 					}
-					// Set parameters. These parameters are the same for both drive modes, so they are outside the switch statement.
-					driveParams = new Object[driveMethod.getParameterCount()];
-					driveParams[0] = driveController.getY(Hand.kLeft);
-					driveParams[1] = driveController.getX(Hand.kLeft);
-					driveParams[2] = driveController.getX(Hand.kRight);
 					break; 
 				case "class edu.wpi.first.wpilibj.drive.KilloughDrive":
 					// Implement later
