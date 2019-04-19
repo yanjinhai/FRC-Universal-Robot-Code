@@ -37,12 +37,16 @@ public class Robot extends TimedRobot {
     // driveMotors.put("Right", new Victor(0));
     // driveMotors.put("Left", new Victor(1));
     Victor motor0 = new Victor(0);
+    Victor motor1 = new Victor(1);
+    Victor motor2 = new Victor(2);
+    Victor motor3 = new Victor(3);
     motor0.setInverted(true);
-    driveMotors.put("Front Right", new Victor(1));
-    driveMotors.put("Front Left", new Victor(2));
+    driveMotors.put("Front Right", motor1);
+    driveMotors.put("Front Left", motor2);
     driveMotors.put("Rear Right", motor0);
-    driveMotors.put("Rear Left", new Victor(3));
+    driveMotors.put("Rear Left", motor3);
     drivetrain = new CustomRobotDriveBase(DriveBase.MECANUM, driveMotors);
+
     // System.out.println("#####" + drivetrain.driveBase());
     // System.out.println("#####" + drivetrain.driveBase().getClass());
   }
