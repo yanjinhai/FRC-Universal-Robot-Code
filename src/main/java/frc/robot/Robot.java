@@ -13,6 +13,7 @@ import java.util.*;
 // WPILib imports
 import edu.wpi.first.wpilibj.*;
 import frc.robot.CustomRobotDriveBase.DriveBase;
+import frc.robot.CustomRobotDriveBase.DriveHIDSetup;
 import frc.robot.CustomRobotDriveBase.DriveMode;
 
 // CTRE imports
@@ -64,7 +65,7 @@ public class Robot extends TimedRobot {
 
   @Override
   public void teleopPeriodic() {
-    drivetrain.drive(DriveMode.POLAR, mainController);
+    drivetrain.drive(DriveMode.POLAR, DriveHIDSetup.XBOXCONTROLLER, mainController);
   }
 
   @Override

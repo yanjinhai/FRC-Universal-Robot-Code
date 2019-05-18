@@ -56,6 +56,13 @@ public class CustomRobotDriveBase {
 	}
 
 	/**
+	 * The drive HID setup. Used in conjunction with CustomRobotDriveBase.drive().
+	 */
+	public static enum HIDSetup {
+        XBOXCONTROLLER, SINGLEJOYSTICK, DOUBLEJOYSTICK;
+	}
+	
+	/**
 	* Constructs a CustomRobotDriveBase object.
 	* 
 	* @param drivetrainType the type of drivetrain used (supports Differential, Meccanum, and Killough).
@@ -129,68 +136,68 @@ public class CustomRobotDriveBase {
 	 * @param driveMode the style of driving (e.g. For Differential drivetrains, the drive modes are Tank, Arcade, and Curvature).
 	 * @param driveController the xbox controller used to drive the robot.
 	 */
-	public void drive(DriveMode driveMode, GenericHID driveController) {
+	public void drive(DriveMode mode, HIDSetup setup, GenericHID controller/*Finish*/) {
 		Method driveMethod = null;
 		try{
 			Class<? extends RobotDriveBase> drivetrainType = this.drivetrain.getClass();
 			switch(drivetrainType.toString()) {
 				case "class edu.wpi.first.wpilibj.drive.DifferentialDrive":
-					switch(driveMode) {
+					switch(mode) {
 						case ARCADE:
 							driveMethod = drivetrainType.getMethod("arcadeDrive", double.class, double.class);
 							// Set parameters
 							driveParams = new Object[driveMethod.getParameterCount()];
-							driveParams[0] = driveController.getX(Hand.kRight);
-							driveParams[1] = driveController.getY(Hand.kLeft);
+							driveParams[0] = controller.getX(Hand.kRight);
+							driveParams[1] = controller.getY(Hand.kLeft);
 							break;
 						case TANK:
 							driveMethod = drivetrainType.getMethod("tankDrive", double.class, double.class);
 							// Set parameters
 							driveParams = new Object[driveMethod.getParameterCount()];
-							driveParams[0] = driveController.getY(Hand.kRight);
-							driveParams[1] = driveController.getY(Hand.kLeft);
+							driveParams[0] = controller.getY(Hand.kRight);
+							driveParams[1] = controller.getY(Hand.kLeft);
 							break;
 						case CURVATURE:
 							driveMethod = drivetrainType.getMethod("curvatureDrive", double.class, double.class, boolean.class);
 							// Set parameters
 							driveParams = new Object[driveMethod.getParameterCount()];
-							driveParams[0] = driveController.getX(Hand.kRight);
-							driveParams[1] = driveController.getY(Hand.kLeft);
+							driveParams[0] = controller.getX(Hand.kRight);
+							driveParams[1] = controller.getY(Hand.kLeft);
 							driveParams[2] = true;
 							break;
 						default:
-							printError("Error: This program does not recognize \"" + driveMode + 
+							printError("Error: This program does not recognize \"" + mode + 
 							"\" as a drive mode for a differential drivetrain.");
 							break;
 					}
 					break;
 				case "class edu.wpi.first.wpilibj.drive.MecanumDrive":
-					switch(driveMode){
+					switch(mode){
 						case CARTESIAN:
 							driveMethod = drivetrainType.getMethod("driveCartesian", double.class, double.class, double.class);
 							// Set parameters.
 							driveParams = new Object[driveMethod.getParameterCount()];
-							driveParams[0] = driveController.getX(Hand.kLeft);
-							driveParams[1] = driveController.getY(Hand.kLeft);
-							driveParams[2] = driveController.getX(Hand.kRight);
+							driveParams[0] = controller.getX(Hand.kLeft);
+							driveParams[1] = controller.getY(Hand.kLeft);
+							driveParams[2] = controller.getX(Hand.kRight);
 							break;
 						case POLAR:
 							driveMethod = drivetrainType.getMethod("drivePolar", double.class, double.class, double.class);
 							// Set parameters.
 							driveParams = new Object[driveMethod.getParameterCount()];
-							driveParams[0] = driveController.getY(Hand.kLeft);
-							driveParams[1] = driveController.getX(Hand.kLeft);
-							driveParams[2] = driveController.getX(Hand.kRight);
+							driveParams[0] = controller.getY(Hand.kLeft);
+							driveParams[1] = controller.getX(Hand.kLeft);
+							driveParams[2] = controller.getX(Hand.kRight);
 							break;
 						default:
-							printError("Error: This program does not recognize \"" + driveMode + 
+							printError("Error: This program does not recognize \"" + mode + 
 							"\" as a drive mode for a mecanum drivetrain.");
 							break;
 					}
 					break; 
 				case "class edu.wpi.first.wpilibj.drive.KilloughDrive":
 					// Implement later
-					switch(driveMode){
+					switch(mode){
 						case CARTESIAN:
 							driveMethod = drivetrainType.getMethod("driveCartesian", double.class, double.class, double.class);
 							break;
@@ -198,15 +205,15 @@ public class CustomRobotDriveBase {
 							driveMethod = drivetrainType.getMethod("drivePolar", double.class, double.class, double.class);
 							break;
 						default:
-							printError("Error: This program does not recognize \"" + driveMode + 
+							printError("Error: This program does not recognize \"" + mode + 
 							"\" as a drive mode for a mecanum drivetrain.");
 							break;
 					}
 					// Set parameters. These parameters are the same for both drive modes, so they are outside the switch statement.
 					driveParams = new Object[driveMethod.getParameterCount()];
-					driveParams[0] = driveController.getY(Hand.kLeft);
-					driveParams[1] = driveController.getX(Hand.kLeft);
-					driveParams[2] = driveController.getX(Hand.kRight);
+					driveParams[0] = controller.getY(Hand.kLeft);
+					driveParams[1] = controller.getX(Hand.kLeft);
+					driveParams[2] = controller.getX(Hand.kRight);
 					break;
 			}	
 		}catch(NoSuchMethodException e){
@@ -221,7 +228,7 @@ public class CustomRobotDriveBase {
 		}
 		// Send information to the dashboard.
 		if(SmartDashboardValuesEnabled){
-			SmartDashboard.putString("Drive Mode", driveMode.name());
+			SmartDashboard.putString("Drive Mode", mode.name());
 		}
 	}
 	/**
